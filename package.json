@@ -1,0 +1,10 @@
+{
+  "name": "factory-manager",
+  "version": "0.1.0",
+  "description": "Browser factory-management game that teaches industrial engineering concepts.",
+  "private": true,
+  "scripts": {
+    "test": "node tests/simulate.js 40",
+    "start": "python3 -m http.server 8000"
+  }
+}
