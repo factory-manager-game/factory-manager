@@ -1,0 +1,16 @@
+[
+  "core/util.js",
+  "content/chapters/index.js",
+  "core/config.js",
+  "core/state.js",
+  "core/workforce.js",
+  "core/production.js",
+  "core/market.js",
+  "core/finance.js",
+  "core/goals.js",
+  "core/actions.js",
+  "systems/bots.js",
+  "systems/events.js",
+  "core/engine.js",
+  "content/chapters/chapters.js"
+]
