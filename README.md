@@ -1,81 +1,67 @@
-# Factory Manager
+# مدیر کارخانه · Factory Manager
 
-**A browser game about running an electronics factory and learning industrial engineering by playing.**
-**یک بازی مدیریتی تحت وب: کارخانه را بچرخان و مفاهیم مهندسی صنایع را بازی‌کنان یاد بگیر.**
+یک بازی مدیریتی تحت وب: بازیکن مدیر کارخانه‌ی کوچکی است که هدفون و اسپیکر می‌سازد. در پنج مرحله، مشکلات واقعی مهندسی صنایع پیش می‌آید (گلوگاه، کیفیت، موجودی، نگهداری) و بازیکن باید آن‌ها را با دانش فنی و ارتباط درست با آدم‌های کارخانه حل کند.
 
-You run a small headphone and speaker plant for 30 working days. Buy materials, plan production batches, staff three machines, keep them healthy, control quality and deliver customer orders on time. The goal is to grow cash from $15,000 to $45,000 without going bankrupt or losing your customers.
+> وضعیت: **در حال ساخت (نسخه‌ی ۰٫۲)**. موتور شبیه‌سازی و پنج مرحله آماده و تست‌شده‌اند؛ رابط کاربری تازه در مرحله‌ی بعدی کار ساخته می‌شود. نسخه‌ی اولیه‌ی قابل‌بازی در پوشه‌ی [`prototype/`](prototype/) است.
 
-Industrial-engineering concepts are built into the rules rather than explained in a lecture: **OEE**, **bottlenecks** (theory of constraints), **preventive maintenance**, **setup time and batching**, **quality control trade-offs**, **inventory holding cost** and **lead times**.
+## اجرا
 
-- Real-time, with pause and 1× / 2× / 4× speed
-- Bilingual: Persian (RTL) and English
-- Pure HTML, CSS and JavaScript: no build step, no libraries, no backend
-- Desktop and mobile layouts
-
-## How to run
-
-Open `index.html` in a browser. That's it: the scripts are plain files, so it works straight from disk (`file://`).
-
-Or serve the folder:
+بدون نصب هیچ چیز:
 
 ```bash
 python3 -m http.server 8000
-# then open http://localhost:8000
+# بعد: http://localhost:8000
 ```
 
-Shortcuts: `Space` pause/resume · `1` `2` `3` speed.
+## تست
 
-## Balance test
-
-The simulation engine has no DOM dependency, so it runs in Node. `tests/simulate.js` plays hundreds of games with bot strategies and reports win rate, cash and score:
+به Node نسخه‌ی ۱۸ یا بالاتر نیاز است؛ هیچ وابستگی دیگری ندارد.
 
 ```bash
-node tests/simulate.js 40     # or: npm test
+node tests/run.js          # تست‌های واحد: قوانین، اقتصاد، رویدادها، بازپخش، تست تصادفی
+node tests/balance.js 60   # بالانس: هر مرحله با چند بات و ۶۰ بذر
 ```
 
-Use it after every change to `js/config.js`.
+هر دو در GitHub Actions روی هر PR اجرا می‌شوند.
 
-## Project structure
+## ساختار
 
 ```
-index.html              page shell, loads scripts in order
-css/style.css           all styles (dark dashboard, RTL/LTR, responsive)
-js/
-  config.js             every game number: prices, times, probabilities, scoring
-  utils.js              seeded RNG, math and time helpers
-  i18n.js               fa/en strings and number formatting
-  engine/               simulation (no DOM, runs in Node too)
-    state.js            game state shape, event log, money helpers
-    production.js       machines, WIP buffers, wear, breakdowns, defects, setup
-    market.js           material prices and deliveries, customer offers and orders
-    finance.js          end-of-day settlement, KPIs (OEE, quality…), final score
-    actions.js          every player action, validated
-    engine.js           new game + time loop (one working minute per step)
-  ui/                   presentation
-    icons.js            inline SVG icon set
-    charts.js           tiny canvas line chart
-    render.js           panels, live updates, modals, toasts
-    app.js              real-time loop, input handling
-tests/simulate.js       headless balance test with bots
-docs/GAME_DESIGN.md     rules and formulas (Persian)
+src/
+  core/            موتور شبیه‌سازی، بدون DOM (در Node هم اجرا می‌شود)
+    config.js      همه‌ی عددهای اقتصاد و بالانس در یک جا
+    state.js       شکل وضعیت بازی
+    workforce.js   اپراتورها، خستگی، روحیه
+    production.js  دستگاه‌ها، صف‌ها، فرسایش، خرابی، عیب، Setup
+    market.js      قیمت مواد، تحویل، سفارش‌ها
+    finance.js     پایان روز، شاخص‌ها (OEE، کیفیت...)
+    goals.js       هدف‌های مرحله، ستاره‌ها، برد و باخت
+    actions.js     همه‌ی اقدام‌های بازیکن، با اعتبارسنجی
+    engine.js      حلقه‌ی زمان، ثبت اقدام‌ها، بازپخش
+  systems/
+    events.js      رویدادهای پویا با هشدار و بررسی انصاف
+    bots.js        بازیکن‌های مرجع برای تست و بررسی انصاف
+  content/
+    chapters/      پنج مرحله و حالت آزاد، به‌صورت داده
+  manifest.json    فهرست و ترتیب بارگذاری فایل‌ها
+tests/             تست‌های واحد و بالانس
+prototype/         نسخه‌ی اولیه (v0.1)
+docs/              سند طراحی و نقشه‌ی راه
 ```
 
-**Architecture in one line:** the UI never changes the game directly. It calls functions in `FM.Actions`, the engine advances `state` minute by minute, and `render.js` reads `state` every frame.
+**قانون اصلی معماری:** رابط کاربری هیچ‌وقت وضعیت بازی را مستقیم عوض نمی‌کند؛ فقط از `FM.Engine.dispatch` اقدام می‌فرستد و وضعیت را می‌خواند. هر بازی با «مرحله، بذر، فهرست اقدام‌ها» کاملاً قابل بازسازی است؛ تحلیل تصمیم‌ها روی همین ساخته می‌شود.
 
-This makes the two halves independently workable: engine and balancing on one side, interface and experience on the other.
+## سند طراحی
 
-## Rules and formulas
+[`docs/DESIGN.md`](docs/DESIGN.md) خلاصه‌ی تصمیم‌ها و لینک سند کامل طراحی است. نقشه‌ی راه در [`docs/ROADMAP.md`](docs/ROADMAP.md) است.
 
-See [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md) for the full rule set: process times, wear and breakdown formulas, QC detection, order generation, KPIs and scoring.
+## سازندگان
 
-## Roadmap ideas
+- **سامیار** · مهندسی صنایع: محتوا، مفاهیم و بالانس
+- **مانی ایمانی‌سنجر (GeekMani)** · مهندسی کامپیوتر: رابط کاربری و تجربه‌ی بازیکن · [@mani-imani](https://github.com/mani-imani)
 
-- Save / load game (state is already plain JSON)
-- Difficulty levels and scenario presets
-- Random events (supplier delay, power outage, rush order)
-- Overtime shifts and worker skill
-- Daily summary screen with what-went-wrong analysis
+پروژه‌ی درس مهارت‌های نرم، دانشگاه آزاد اسلامی.
 
-## Authors
+## مجوز
 
-Built by **Samyar** (industrial engineering) and **Mani ImaniSanjar — GeekMani** ([@mani-imani](https://github.com/mani-imani)) (computer engineering).
+همه‌ی حقوق محفوظ است. جزئیات در [`LICENSE`](LICENSE).

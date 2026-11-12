@@ -9,7 +9,7 @@
 
 global.window = global;
 var path = require('path');
-var root = path.join(__dirname, '..', 'js');
+var root = path.join(__dirname, 'js');
 ['config.js', 'utils.js', 'engine/state.js', 'engine/production.js', 'engine/market.js',
   'engine/finance.js', 'engine/actions.js', 'engine/engine.js'
 ].forEach(function (f) { require(path.join(root, f)); });
