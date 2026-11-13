@@ -17,3 +17,15 @@ jobs:
         run: node tests/run.js
       - name: Balance (every chapter, many seeds)
         run: node tests/balance.js 60
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install the browser driver (uses the runner's Chrome)
+        run: npm i --no-save playwright-core@1.49
+      - name: Play the game in Chrome, desktop and phone
+        run: node tests/browser.js

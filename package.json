@@ -1,12 +1,13 @@
 {
   "name": "factory-manager",
-  "version": "0.2.0-dev",
+  "version": "0.3.0-dev",
   "description": "بازی مدیریت کارخانه تحت وب برای آموزش مهندسی صنایع و مهارت‌های نرم",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
     "test": "node tests/run.js",
     "balance": "node tests/balance.js 60",
+    "browser": "node tests/browser.js",
     "start": "python3 -m http.server 8000"
   },
   "engines": { "node": ">=18" }
