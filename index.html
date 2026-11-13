@@ -2,11 +2,117 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>مدیر کارخانه · Factory Manager</title>
-  <meta http-equiv="refresh" content="0; url=prototype/">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#FFF8EE">
+  <meta name="description" content="مدیر کارخانه: بازی مدیریت یک کارخانه‌ی کوچک برای آموزش مهندسی صنایع">
+  <title>مدیر کارخانه</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/game.css">
 </head>
 <body>
-  <p>نسخه‌ی کامل بازی در حال ساخت است. <a href="prototype/">نسخه‌ی اولیه را بازی کنید</a>.</p>
+  <main id="app">
+
+    <section id="menu" class="screen menu" aria-labelledby="menu-title">
+      <div class="menu-inner">
+        <header class="menu-head">
+          <div class="logo" aria-hidden="true">
+            <svg width="64" height="64" viewBox="0 0 64 64"><rect x="4" y="22" width="56" height="38" rx="8" fill="#5B86FF"/><path d="M4 30 L20 18 V30 L36 18 V30 L52 18 V30" fill="#4369E0"/><rect x="44" y="4" width="10" height="24" rx="3" fill="#FF8A3D"/><rect x="14" y="38" width="12" height="12" rx="3" fill="#fff"/><rect x="38" y="38" width="12" height="12" rx="3" fill="#fff"/></svg>
+          </div>
+          <div>
+            <h1 id="menu-title">مدیر کارخانه</h1>
+            <p>بازی مدیریت کارخانه برای آموزش مهندسی صنایع</p>
+          </div>
+        </header>
+        <div id="chapters" class="chapters"></div>
+        <p class="menu-note">نقشه‌ی مرحله‌ها، داستان و ماموریت‌های جانبی در نسخه‌ی بعدی می‌آید.</p>
+      </div>
+    </section>
+
+    <section id="game" class="screen game" hidden>
+      <header id="hud" class="hud">
+        <div class="hud-chapter">
+          <button type="button" class="round" data-act="back" aria-label="بازگشت به فهرست مرحله‌ها">
+            <svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <div class="hud-info">
+            <div class="hud-line"><b id="hud-title"></b><span id="hud-day"></span></div>
+            <div class="hud-track"><i id="hud-progress"></i></div>
+            <div id="hud-goals"></div>
+          </div>
+        </div>
+        <div class="hud-stats">
+          <div class="pill" id="pill-cash" title="نقدینگی">
+            <svg class="ic gold" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.8 1.8 0 0 1 0 3.5h-3a1.8 1.8 0 0 0 0 3.5h4"/></svg>
+            <span class="sr">نقدینگی</span><span id="hud-cash"></span>
+          </div>
+          <div class="pill" id="pill-sat" title="رضایت مشتری">
+            <svg class="ic teal" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5s1.3 1.8 3.5 1.8 3.5-1.8 3.5-1.8M9 9.5h.01M15 9.5h.01"/></svg>
+            <span class="sr">رضایت مشتری</span><span id="hud-sat"></span>
+          </div>
+          <div class="pill clock">
+            <b id="hud-clock"></b>
+            <button type="button" id="btn-pause" class="clock-btn" data-act="pause" aria-label="توقف"></button>
+            <button type="button" id="btn-speed" class="clock-btn speed" data-act="speed" aria-label="سرعت"></button>
+          </div>
+        </div>
+      </header>
+
+      <div class="floor-wrap"><div id="floor" class="floor"></div></div>
+
+      <div id="pop" class="pop" hidden role="dialog" aria-label="دستگاه"></div>
+      <div id="toasts" class="toasts" aria-live="polite"></div>
+
+      <section id="sheet" class="sheet" hidden aria-labelledby="sheet-title">
+        <header class="sheet-head">
+          <h2 id="sheet-title"></h2>
+          <button type="button" class="btn icon" data-act="closeSheet" aria-label="بستن">
+            <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </header>
+        <div id="sheet-body" class="sheet-body"></div>
+      </section>
+
+      <nav id="dock" class="dock" aria-label="منوی بازی">
+        <button type="button" data-act="sheet" data-sheet="orders" aria-pressed="false"><span class="dock-ic" data-icon="orders"></span><span>سفارش‌ها</span><i class="dock-badge" hidden></i></button>
+        <button type="button" data-act="sheet" data-sheet="plan" aria-pressed="false"><span class="dock-ic" data-icon="plan"></span><span>تولید</span><i class="dock-badge" hidden></i></button>
+        <button type="button" data-act="sheet" data-sheet="buy" aria-pressed="false"><span class="dock-ic" data-icon="buy"></span><span>خرید</span><i class="dock-badge" hidden></i></button>
+        <button type="button" data-act="sheet" data-sheet="workers" aria-pressed="false"><span class="dock-ic" data-icon="workers"></span><span>کارگرها</span><i class="dock-badge" hidden></i></button>
+        <button type="button" data-act="sheet" data-sheet="report" aria-pressed="false"><span class="dock-ic" data-icon="report"></span><span>گزارش</span><i class="dock-badge" hidden></i></button>
+      </nav>
+    </section>
+
+    <div id="modal" class="modal" hidden role="dialog" aria-modal="true">
+      <div id="modal-card" class="modal-card"></div>
+    </div>
+  </main>
+
+  <noscript><p class="noscript">برای بازی، جاوااسکریپت مرورگر را روشن کنید.</p></noscript>
+
+  <!-- Engine: same order as src/manifest.json (checked by tests/unit/ui.test.js) -->
+  <script src="src/core/util.js"></script>
+  <script src="src/content/chapters/index.js"></script>
+  <script src="src/core/config.js"></script>
+  <script src="src/core/state.js"></script>
+  <script src="src/core/workforce.js"></script>
+  <script src="src/core/production.js"></script>
+  <script src="src/core/market.js"></script>
+  <script src="src/core/finance.js"></script>
+  <script src="src/core/goals.js"></script>
+  <script src="src/core/actions.js"></script>
+  <script src="src/systems/bots.js"></script>
+  <script src="src/systems/events.js"></script>
+  <script src="src/core/engine.js"></script>
+  <script src="src/content/chapters/chapters.js"></script>
+  <!-- Interface -->
+  <script src="src/ui/strings.js"></script>
+  <script src="src/ui/icons.js"></script>
+  <script src="src/ui/dom.js"></script>
+  <script src="src/ui/scene.js"></script>
+  <script src="src/ui/panels.js"></script>
+  <script src="src/ui/app.js"></script>
+  <script>
+    document.querySelectorAll('[data-icon]').forEach(function (el) { el.innerHTML = FM.Icons.icon(el.getAttribute('data-icon'), 24); });
+  </script>
 </body>
 </html>
